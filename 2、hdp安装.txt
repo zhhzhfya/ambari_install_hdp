@@ -1,0 +1,32 @@
+1、服务安装采坑
+
+#这里主要hive的数据存储默认选mysql，这个要改成postgresql，不然它安装mysql失败，因为集成包里没有mysql！！！！！
+
+#如果重启服务器，没有起来，看是不是fstab里加载了iso
+#————————————安装过程遇到的问题备注
+#certificate verify failed
+修改 /etc/python/cert-verification.cfg里verify=diasble
+
+#unmount 如果设备busy
+umount -fl /media/CentOS7
+
+#缺少linux lsb 异常
+3个服务器都 mount 。。。。。iso  
+配置yum的repo
+并用rpm 安装 linxu-lsb
+
+
+#hdfs安装注意data directories的目录
+#hbaes注意启用phoenix查询、配置regionserver的内存20G~40G
+
+#hbase修改hbase.regionserver.wal.codec：
+org.apache.hadoop.hbase.regionserver.wal.WALCellCodec -> org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec
+
+#hive安装 
+安装mysql驱动
+ambari-server setup --jdbc-db=mysql --jdbc-driver=/path/to/mysql/mysql-connector-java.jar
+#mysql的数据库创建、用户创建：需要手动修改，是否创建库、用户、授权：
+/var/lib/ambari-server/resources/Ambari-DDL-MySQL-CREATE.sql
+
+参考：
+https://blog.csdn.net/wang_zhenwei/article/details/53083241

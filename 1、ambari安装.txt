@@ -1,0 +1,74 @@
+#3台服务器地址
+	192.168.6.241 hd1
+	192.168.6.242 hd3
+	192.168.6.243 hd2
+#安装jdk8
+	rpm -ivh jdk-8u51-linux-x64.rpm
+#安装jdk，修改/etc/profile，配置JAVA_HOME
+source /etc/profile
+#无密钥登录
+	vi /etc/ssh/sshd_config 
+#放开
+	PubkeyAuthentication yes
+	AuthorizedKeysFile      .ssh/authorized_keys
+#然后
+	systemctl restart  sshd.service
+
+	ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
+	cat ~/.ssh/id_dsa.pub >>~/.ssh/authorized_keys
+	chmod 600 ~/.ssh/authorized_keys
+	scp ~/.ssh/authorized_keys root@hd2:~/.ssh/authorized_keys 
+	scp ~/.ssh/authorized_keys root@hd3:~/.ssh/authorized_keys
+
+本地资源搭建
+
+1、centos7 关闭防火墙 
+#停止firewall
+	systemctl stop firewalld.service
+
+#禁止firewall开机启动
+	systemctl disable firewalld.service
+ 
+#查看默认防火墙状态（关闭后显示notrunning，开启后显示running）
+	firewall-cmd --state
+
+下载hdp的本地资源包
+http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.1.0/ambari-2.4.1.0-centos7.tar.gz
+http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.0.0/HDP-2.5.0.0-centos7-rpm.tar.gz
+http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7/HDP-UTILS-1.1.0.21-centos7.tar.gz
+	
+#安装http服务
+	cd /var/www/
+	mkdir hdp
+	tar -xvf HDP-2.5.0.0-centos7-rpm.tar
+	mkdir HDP-UTILS-1.1.0.21
+	cd HDP-UTILS-1.1.0.21/
+# HDP-UTILS-1.1.0.21-centos7.tar 拷贝到 /var/www/html/hdp/HDP-UTILS-1.1.0.21
+	tar -xvf HDP-UTILS-1.1.0.21-centos7.tar
+#解开ambari安装包
+	tar -xvf ambari-2.4.1.0-centos7.tar
+
+#安装ambari
+	cd /opt/hdp_centos7/AMBARI-2.4.1.0/centos7/2.4.1.0-22/ambari
+	rpm -ivh ambari-server-2.4.1.0-22.x86_64.rpm
+	ambari-server setup
+	
+#如果离线从光盘安装postgresql，要删除/etc/yum.repos.d/里无用的repo文件
+#安装过程中选择一个数据库：
+	yum install postgresql
+	yum install postgresql-server
+	...
+	Path to JAVA_HOME: /usr/java/jdk1.8.0_51
+	
+#安装完成
+  	ambari-server start
+#浏览器登录：admin、admin
+http://192.168.6.241:8080
+#添加服务器节点 用到了master的id_rsa私钥，下载到本地选择进去就行
+
+#本地repo服务的url地址，在资源选择页面，选择本地资源，redhat7栏
+http://192.168.6.241/hdp/HDP/centos7/
+http://192.168.6.241/hdp/HDP-UTILS-1.1.0.21/
+
+
+完，下一步>>>进入hdp安装.txt

@@ -1,0 +1,1 @@
+# install ambari & install hdp
